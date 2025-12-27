@@ -1,25 +1,30 @@
-// frontend/src/App.js
-import React, { useEffect, useState } from 'react';
-import api from './api';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import PostDetail from './pages/PostDetail';
 
 function App() {
-  const [message, setMessage] = useState('');
-  
-  useEffect(() => {
-    // Call backend health endpoint
-    api.get('/')
-      .then(res => setMessage(res.data.message))
-      .catch(err => {
-        console.error(err);
-        setMessage('Error connecting to backend');
-      });
-  }, []);
-
   return (
-    <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>IT Developer Blog</h1>
-      <p>Backend status: {message}</p>
-    </div>
+    <AuthProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="/post/:slug" element={<PostDetail />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </AuthProvider>
   );
 }
 
