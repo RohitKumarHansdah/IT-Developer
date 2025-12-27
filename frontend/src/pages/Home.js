@@ -1,3 +1,4 @@
+// Replace the existing Home component with this (add auth buttons)
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../api';
@@ -9,61 +10,72 @@ const Home = () => {
   const { user } = useAuth();
 
   useEffect(() => {
-    api.get('/api/posts')
-      .then(res => setPosts(res.data.posts || []))
-      .catch(err => console.error(err))
-      .finally(() => setLoading(false));
+    api.get('/')
+      .then(res => console.log('Backend:', res.data.message))
+      .catch(err => console.error(err));
   }, []);
-
-  if (loading) {
-    return <div className="text-center py-12">Loading posts...</div>;
-  }
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Latest Blog Posts
+      <div className="mb-12 text-center">
+        <h1 className="text-5xl md:text-6xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+          IT Developer Blog
         </h1>
-        {user && (
+        <p className="text-xl text-gray-600 mb-8">
+          Welcome to the ultimate blogging platform
+        </p>
+        
+        {user ? (
           <Link 
             to="/dashboard" 
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600"
+            className="inline-flex items-center px-8 py-4 bg-blue-600 text-white text-lg font-semibold rounded-full hover:bg-blue-700 shadow-xl transform hover:-translate-y-1 transition-all duration-200"
           >
             Create New Post
+            <span className="ml-2">→</span>
           </Link>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link 
+              to="/register" 
+              className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-semibold rounded-full hover:from-green-600 hover:to-green-700 shadow-xl transform hover:-translate-y-1 transition-all duration-200"
+            >
+              Get Started
+            </Link>
+            <Link 
+              to="/login" 
+              className="px-8 py-4 bg-white border-2 border-gray-200 text-gray-800 text-lg font-semibold rounded-full hover:bg-gray-50 shadow-lg transform hover:-translate-y-1 transition-all duration-200"
+            >
+              Sign In
+            </Link>
+          </div>
         )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {posts.map(post => (
-          <div key={post._id} className="bg-white rounded-xl shadow-md overflow-hidden">
-            <div className="p-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 overflow-hidden group">
+            <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500"></div>
+            <div className="p-8">
               <div className="flex items-center text-sm text-gray-500 mb-4">
-                <span>By {post.author?.username || 'Unknown'}</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                Published
               </div>
-              <h2 className="text-2xl font-bold mb-4">
-                <Link to={`/post/${post.slug}`} className="hover:text-blue-600">
-                  {post.title}
-                </Link>
-              </h2>
-              <p className="text-gray-600 mb-6">{post.excerpt}</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-blue-600 transition-colors">
+                Welcome to Blogging Platform
+              </h3>
+              <p className="text-gray-600 mb-6 line-clamp-3">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              </p>
               <Link 
-                to={`/post/${post.slug}`}
-                className="text-blue-600 font-semibold hover:text-blue-800"
+                to={`/post/${i}`}
+                className="text-blue-600 font-semibold hover:text-blue-800 flex items-center"
               >
-                Read More →
+                Read More <span className="ml-2">→</span>
               </Link>
             </div>
           </div>
         ))}
       </div>
-
-      {posts.length === 0 && (
-        <div className="text-center py-12 text-gray-500">
-          No posts yet. {user ? 'Create the first one!' : 'Stay tuned!'}
-        </div>
-      )}
     </div>
   );
 };
