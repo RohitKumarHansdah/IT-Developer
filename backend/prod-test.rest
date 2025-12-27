@@ -1,0 +1,23 @@
+### Health check
+GET https://blogging-system-hfgy.onrender.com/
+
+###
+### Register
+POST https://blogging-system-hfgy.onrender.com/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "produser1",
+  "email": "produser1@example.com",
+  "password": "ProdTest@123"
+}
+
+###
+### Login
+POST https://blogging-system-hfgy.onrender.com/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "produser1@example.com",
+  "password": "ProdTest@123"
+}
