@@ -1,0 +1,29 @@
+### Step 1: Test API
+GET http://localhost:5000
+
+###
+### Step 2: Register New User
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "testuser001",
+  "email": "testuser001@example.com",
+  "password": "Test@1234567"
+}
+
+###
+### Step 3: Login User
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "testuser001@example.com",
+  "password": "Test@1234567"
+}
+
+###
+### Step 4: Get User Profile (Copy token from Step 3 response)
+GET http://localhost:5000/api/auth/me
+Authorization: Bearer YOUR_TOKEN_HERE_COPY_FROM_STEP3
+
