@@ -3,56 +3,78 @@ import api from '../api';
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within AuthProvider');
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      api.get('/api/auth/me')
-        .then(res => setUser(res.data))
-        .catch(() => {
-          localStorage.removeItem('token');
-          delete api.defaults.headers.common['Authorization'];
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    checkAuth();
   }, []);
 
-  const login = async (email, password) => {
-    const res = await api.post('/api/auth/login', { email, password });
-    const { token, user } = res.data;
-    
-    localStorage.setItem('token', token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return res.data;
+  const checkAuth = async () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const res = await api.get('/api/auth/me');
+        setUser(res.data);
+      } catch (err) {
+        localStorage.removeItem('token');
+        setUser(null);
+      }
+    }
+    setLoading(false);
   };
 
-  const register = async (userData) => {
-    const res = await api.post('/api/auth/register', userData);
-    const { token, user } = res.data;
-    
-    localStorage.setItem('token', token);
-    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    setUser(user);
-    return res.data;
+  const register = async (username, email, password) => {
+    try {
+      const res = await api.post('/api/auth/register', {
+        username,
+        email,
+        password,
+      });
+      const { token, user } = res.data;
+      localStorage.setItem('token', token);
+      setUser(user);
+      setError(null);
+      return res.data;
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Registration failed';
+      setError(errorMsg);
+      throw err;
+    }
+  };
+
+  const login = async (email, password) => {
+    try {
+      const res = await api.post('/api/auth/login', { email, password });
+      const { token, user } = res.data;
+      localStorage.setItem('token', token);
+      setUser(user);
+      setError(null);
+      return res.data;
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || 'Login failed';
+      setError(errorMsg);
+      throw err;
+    }
   };
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete api.defaults.headers.common['Authorization'];
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, loading, error, register, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
